@@ -5,6 +5,9 @@ import { UserEntity } from '../../user/entities/user.entity';
 import { PostVisibility } from '../../../common/contants';
 import { MediaEntity } from './media.entity';
 import { CommentEntity } from '../../comment/entities/comment.entity';
+import { PositionController } from 'src/modules/position/position.controller';
+import { PositionEntity } from 'src/modules/position/entities/position.entity';
+import { Col } from 'sequelize/lib/utils';
 
 @Table({
     tableName: 'Post'
@@ -32,9 +35,13 @@ export class PostEntity extends Model<PostEntity> {
     @Column(DataType.ENUM(...Object.values(PostVisibility) as string[]))
     visibility: PostVisibility;
 
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    location_id: string;
+    @ForeignKey(() => PositionEntity)
+    @AllowNull(false)
+    @Column(DataType.UUID)
+    location_id: UUID;
+
+    @BelongsTo(() => PositionEntity)
+    location: PositionEntity;
 
     @AllowNull(true)
     @Column(DataType.FLOAT)

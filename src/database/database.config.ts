@@ -27,3 +27,4 @@ export const databaseConfig: IDatabaseConfig = {
     }
   },
 };
+console.log(databaseConfig)

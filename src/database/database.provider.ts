@@ -6,6 +6,7 @@ import { UserEntity } from 'src/modules/user/entities/user.entity';
 import { PostEntity } from 'src/modules/post/entities/post.entity';
 import { MediaEntity } from 'src/modules/post/entities/media.entity';
 import { CommentEntity } from 'src/modules/comment/entities/comment.entity';
+import { PositionEntity } from 'src/modules/position/entities/position.entity';
 
 export const databaseProviders = [
     {
@@ -13,7 +14,7 @@ export const databaseProviders = [
         useFactory: async () => {
             const config = databaseConfig.database;
             const sequelize = new Sequelize(config);
-            sequelize.addModels([AuthEntity, UserEntity, PostEntity, MediaEntity, CommentEntity]);
+            sequelize.addModels([AuthEntity, UserEntity, PostEntity, MediaEntity, CommentEntity, PositionEntity]);
             await sequelize.sync();
 
             try {
