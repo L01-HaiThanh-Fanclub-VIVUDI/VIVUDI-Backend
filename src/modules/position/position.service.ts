@@ -25,4 +25,25 @@ export class PositionService {
     // return 'This action adds a new position';
   }
 
+  findAll() {
+    return this.positionModel.findAll();
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} position`;
+  }
+
+  async remove(id: number, transaction: Transaction) {
+    try {
+      const position = await this.positionModel.findByPk(id, { transaction });
+      if (!position) {
+        throw new Error('Position not found');
+      }
+      await position.destroy({ transaction });
+      return `This action removes a #${id} position`;
+    } catch (error) {
+      console.error('Failed to remove position:', error);
+      throw error;
+    }
+  }
 }
