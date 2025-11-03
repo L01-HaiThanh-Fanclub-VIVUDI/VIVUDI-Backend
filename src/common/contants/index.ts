@@ -22,5 +22,7 @@ export enum LocationType {
     COFFEE = 'coffee',
     STREET_FOOD = 'street_food',
     RESTAURANT = 'restaurant',
-    OTHER = 'other'
+    OTHER = 'other',
 }
+
+export const GOOGLE_DRIVE_ROOT_FOLDER_ID = '1yOwWaFT57zf7qhD8nWfRJbQULP8UPUNw';

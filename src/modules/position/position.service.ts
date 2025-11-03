@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PositionEntity } from './entities/position.entity';
 import { InjectModel } from '@nestjs/sequelize';
-import { CreatePositionDto } from './dto/createPositionDto';
+import { CreatePositionDto } from './dtos/create-position.dto';
 import { Transaction, UUID } from 'sequelize';
 import { DataType } from 'sequelize-typescript';
 // import { UpdatePositionDto } from './dto/update-position.dto';
@@ -13,10 +13,10 @@ export class PositionService {
     private readonly positionModel: typeof PositionEntity
   ) { }
 
-  async create(createPositionDto: any, transaction: Transaction): Promise<PositionEntity> {
+  async create(createPositionDto: CreatePositionDto, transaction: Transaction): Promise<PositionEntity> {
     try {
 
-      return await this.positionModel.create({...createPositionDto}, { transaction })
+      return await this.positionModel.create({...createPositionDto} as any, { transaction })
     }
     catch (error) {
       console.error('Failed to create position:', error);
@@ -45,5 +45,10 @@ export class PositionService {
       console.error('Failed to remove position:', error);
       throw error;
     }
+  }
+
+  async checkPositionExist(positionId: string): Promise<boolean> {
+    const position = await this.positionModel.findOne({ where: { id: positionId } });
+    return !!position;
   }
 }

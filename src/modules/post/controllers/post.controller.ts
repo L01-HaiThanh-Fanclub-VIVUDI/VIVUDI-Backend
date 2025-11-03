@@ -1,9 +1,74 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFiles, Inject, HttpException, BadRequestException, InternalServerErrorException, UseGuards, Req, Get, Param } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { PostService } from '../services/post.service';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreatePostRequestDto } from '../dtos/create-post-request.dto'; // New import
+import { Sequelize } from 'sequelize-typescript';
+import { SEQUELIZE } from 'src/common/contants';
+import { Response as ResponseService } from 'src/modules/common/response/response.entity';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { Request } from 'express';
+import type { UUID } from 'crypto';
+
+interface AuthenticatedRequest extends Request {
+    user: { userId: UUID; email: string; };
+}
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    @Inject(SEQUELIZE) private readonly sequelize: Sequelize,
+    private readonly responseService: ResponseService,
+  ) {}
 
-  // Add your controller methods here
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('media'))
+  async createPost(@Body() body: CreatePostRequestDto, @Req() req: AuthenticatedRequest, @UploadedFiles() files: Express.Multer.File[]) { // Modified line
+    const transaction = await this.sequelize.transaction();
+    try {
+      const createPostDto = plainToInstance(CreatePostDto, JSON.parse(body.data));
+      const errors = await validate(createPostDto);
+
+      if (errors.length > 0) {
+        const errorMessages = errors
+          .map(error => (error.constraints ? Object.values(error.constraints) : []))
+          .flat();
+        throw new BadRequestException(this.responseService.initResponse(false, 'Validation failed', errorMessages));
+      }
+      
+      createPostDto.author_id = req.user.userId;
+
+      const post = await this.postService.createPost(createPostDto, files, transaction); // Modified line
+
+      await transaction.commit();
+      return this.responseService.initResponse(true, 'Post created successfully', post);
+    } catch (error) {
+      await transaction.rollback();
+      if (error instanceof BadRequestException) {
+        const validationErrors = (error.getResponse() as any).message;
+        throw new BadRequestException(this.responseService.initResponse(false, 'Validation failed', validationErrors));
+      } else if (error instanceof HttpException) {
+        throw new HttpException(this.responseService.initResponse(false, error.message, null), error.getStatus());
+      }
+      throw new InternalServerErrorException(this.responseService.initResponse(false, 'Internal Server Error', null));
+    }
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getPost(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    try {
+      const post = await this.postService.getPostById(id);
+      return this.responseService.initResponse(true, 'Post fetched successfully', post);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException(this.responseService.initResponse(false, error.message, null), error.getStatus());
+      }
+      throw new InternalServerErrorException(this.responseService.initResponse(false, 'Internal Server Error', null));
+    }
+  }
 }
