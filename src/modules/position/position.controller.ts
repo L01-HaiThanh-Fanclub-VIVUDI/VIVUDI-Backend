@@ -1,34 +1,55 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/createPositionDto';
+import { Sequelize } from 'sequelize';
+import { Response as ResponseService } from 'src/modules/common/response/response.entity';
+import { SEQUELIZE } from 'src/common/contants';
 // import { UpdatePositionDto } from './dto/update-position.dto';
 
 @Controller('position')
 export class PositionController {
-  constructor(private readonly positionService: PositionService) {}
+    constructor(
+        @Inject(PositionService) private readonly positionService: PositionService,
+        private readonly responseService: ResponseService,
+        @Inject(SEQUELIZE) private readonly sequelize: Sequelize
 
-  @Post()
-  create(@Body() createPositionDto: CreatePositionDto) {
-    return this.positionService.create(createPositionDto);
-  }
+    ) { }
 
-  @Get()
-  findAll() {
-    return this.positionService.findAll();
-  }
+    @Post('createPosition')
+    async create(@Body() createPositionDto: CreatePositionDto) {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const position = await this.positionService.create(createPositionDto, transaction);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.positionService.findOne(+id);
-  }
+            await transaction.commit()
+            return this.responseService.initResponse(true, "Create position successfully", position);
+        }
+        catch (error) {
+            await transaction.rollback()
+            console.log(`Error: ${error}`)
+            return this.responseService.initResponse(true, "Something is wrong", null);
+        }
+    }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePositionDto: UpdatePositionDto) {
-  //   return this.positionService.update(+id, updatePositionDto);
-  // }
+    // @Get()
+    // findAll() {
+    //   return this.positionService.findAll();
+    // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.positionService.remove(+id);
-  }
+    // @Get(':id')
+    // findOne(@Param('id') id: string) {
+    //   return this.positionService.findOne(+id);
+    // }
+
+    // @Patch(':id')
+    // update(@Param('id') id: string, @Body() updatePositionDto: UpdatePositionDto) {
+    //   return this.positionService.update(+id, updatePositionDto);
+    // }
+
+    // @Delete(':id')
+    // remove(@Param('id') id: string) {
+    //   return this.positionService.remove(+id);
+    // }
 }
+
+export default PositionController

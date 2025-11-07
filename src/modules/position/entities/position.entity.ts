@@ -5,7 +5,7 @@ import { MediaEntity } from 'src/modules/post/entities/media.entity';
 import { LocationType } from 'src/common/contants';
 
 @Table({
-    tableName: 'position',
+    tableName: 'Position',
     timestamps: true,
 })
 export class PositionEntity extends Model<PositionEntity> {
