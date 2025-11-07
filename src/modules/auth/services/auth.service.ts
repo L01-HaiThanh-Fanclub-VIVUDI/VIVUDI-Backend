@@ -7,6 +7,11 @@ import { Response } from 'src/modules/common/response/response.entity';
 import { RegisterDto } from '../dtos/register.dto';
 import { Transaction } from 'sequelize';
 import { UserService } from 'src/modules/user/services/user.service';
+import { JwtService } from '@nestjs/jwt';
+
+function generateOTP(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 @Injectable()
 export class AuthService {
@@ -14,6 +19,7 @@ export class AuthService {
         @Inject(AUTH_REPOSITORY) private readonly authRepository: typeof AuthEntity,
         private readonly response: Response,
         private readonly userService: UserService,
+        private readonly jwtService: JwtService,
     ) {}
 
     async register(registerDto: RegisterDto, transaction: Transaction) {
@@ -52,63 +58,68 @@ export class AuthService {
         };
         const user = await this.authRepository.create(userData as any, { transaction });
 
-        // Create empty user profile
-        await this.userService.createUser(user.id, {}, transaction);
+        // Create user profile and get the user entity
+        const userProfile = await this.userService.createUser(user.id, {}, transaction);
 
-        return user;
+        // Generate JWT token with user_id (from UserEntity), email, and role after successful registration
+        const payload = { userId: userProfile.id, email: user.email }; // Use userProfile.id here
+        const token = this.jwtService.sign(payload);
+
+        const { password: _, ...userWithoutPassword } = user.toJSON();
+        return { user: userWithoutPassword, token };
     }
 
-    // async login(email: string, password: string) {
-    //     // Validate input
-    //     if (!email) {
-    //         throw this.response.initResponse(false, 'Email is required', null);
-    //     }
-    //     if (!password) {
-    //         throw this.response.initResponse(false, 'Password is required', null);
-    //     }
+    async login(email: string, password: string, transaction: Transaction) {
+        // Validate input
+        if (!email) {
+            throw new BadRequestException('Email is required');
+        }
+        if (!password) {
+            throw new BadRequestException('Password is required');
+        }
 
-    //     // Find user by email
-    //     const user = await this.authRepository.findOne({ where: { email } });
-    //     if (!user) {
-    //         throw this.response.initResponse(false, 'Email not registered', null);
-    //     }
+        // Find user by email
+        const user = await this.authRepository.findOne({ where: { email }, transaction });
+        if (!user) {
+            throw new BadRequestException('Email not registered');
+        }
 
-    //     // Verify password
-    //     const isValidPassword = await bcrypt.compare(password, user.password);
-    //     if (!isValidPassword) {
-    //         throw this.response.initResponse(false, 'Wrong password', null);
-    //     }
+        // Verify password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            throw new BadRequestException('Wrong password');
+        }
 
-    //     // Generate JWT token with id, email, and role
-    //     const token = jwt.sign(
-    //         { id: user.id, email: user.email, role: user.role }, // Assuming user has a role property
-    //         process.env.JWT_SECRET_KEY || 'your-secret-key',
-    //         { expiresIn: '24h' }
-    //     );
+        // Generate JWT token with user_id (from UserEntity), email, and role
+        const userProfile = await this.userService.getUserByAuthId(user.id as any, transaction); // Explicitly cast user.id to UUID
+        if (!userProfile) {
+          throw new BadRequestException('User profile not found.');
+        }
+        const payload = { userId: userProfile.id, email: user.email /*, role: userProfile.role */ }; // Use userProfile.id here
+        const token = this.jwtService.sign(payload);
 
-    //     return this.response.initResponse(true, 'Login successful', { token });
-    // }
+        const { password: _, ...userWithoutPassword } = user.toJSON();
+        return { user: userWithoutPassword, token };
+    }
 
-    // async forgotPassword(email: string) {
+    // async forgotPassword(email: string, transaction: Transaction) {
     //     // Check if email exists
-    //     const user = await this.authRepository.findOne({ where: { email } });
+    //     const user = await this.authRepository.findOne({ where: { email }, transaction });
     //     if (!user) {
-    //         throw this.response.initResponse(false, 'Email not found', null);
+    //         throw new BadRequestException('Email not found');
     //     }
 
     //     // Generate OTP
     //     const otp = generateOTP();
     //     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-    //     expiresAt.setHours(expiresAt.getHours() + 7);
-        
+    //     // expiresAt.setHours(expiresAt.getHours() + 7); // Adjust for UTC if needed
+
     //     // Save OTP to database
     //     // Assuming a PasswordReset entity exists and the authRepository has a method to create it
-    //     await this.authRepository.createPasswordReset({
-    //         id: generateUUID(),
-    //         email,
-    //         otp,
-    //         expiresAt
-    //     });
+    //     // For now, let's assume a temporary in-memory store or a simple entity
+    //     // In a real application, you would create a PasswordReset entity and store it in the database.
+    //     // For simplicity, I'll just log it for now.
+    //     console.log(`Generated OTP for ${email}: ${otp}, expires at: ${expiresAt}`);
 
     //     // Send OTP email
     //     await this.emailService.sendPasswordResetEmail(email, otp);
@@ -116,93 +127,90 @@ export class AuthService {
     //     return this.response.initResponse(true, 'Password reset OTP sent to email', null);
     // }
 
-    // async verifyOTP(otp: string) {
-    //     // Find OTP
-    //     const resetRecord = await this.authRepository.findOne({ where: { otp } }); // Assuming otp is stored in a PasswordReset entity
+    async verifyOTP(otp: string, transaction: Transaction) {
+        // Find OTP in database (replace with actual database lookup)
+        // For now, simulate lookup and assume valid for a short period.
+        const simulatedOTPStore = {}; // This should be replaced with a real database table/entity
+        const resetRecord = simulatedOTPStore[otp]; // This would be a database query
+
+        if (!resetRecord) {
+            throw new BadRequestException('Invalid OTP');
+        }
+
+        if (resetRecord.expiresAt < new Date()) {
+            throw new BadRequestException('OTP expired');
+        }
+
+        if (resetRecord.used) {
+            throw new BadRequestException('OTP already used');
+        }
+
+        // Mark OTP as used (replace with database update)
+        resetRecord.used = true;
+
+        return { email: resetRecord.email };
+    }
+
+    // async resetPassword(otp: string, newPassword: string, transaction: Transaction) {
+    //     // Find OTP in database (replace with actual database lookup)
+    //     const simulatedOTPStore = {}; // This should be replaced with a real database table/entity
+    //     const resetRecord = simulatedOTPStore[otp]; // This would be a database query
+
     //     if (!resetRecord) {
-    //         throw this.response.initResponse(false, 'Invalid OTP', null);
+    //         throw new BadRequestException('Invalid OTP');
     //     }
 
-    //     // Check if OTP is expired
     //     if (resetRecord.expiresAt < new Date()) {
-    //         throw this.response.initResponse(false, 'OTP expired', null);
+    //         throw new BadRequestException('OTP expired');
     //     }
 
-    //     // Check if OTP is already used
     //     if (resetRecord.used) {
-    //         throw this.response.initResponse(false, 'OTP already used', null);
+    //         throw new BadRequestException('OTP already used');
     //     }
 
-    //     return this.response.initResponse(true, 'OTP verified successfully', { email: resetRecord.email });
-    // }
-
-    // async resetPassword(otp: string, newPassword: string) {
-    //     // Find OTP
-    //     const resetRecord = await this.authRepository.findOne({ where: { otp } }); // Assuming otp is stored in a PasswordReset entity
-    //     if (!resetRecord) {
-    //         throw this.response.initResponse(false, 'Invalid OTP', null);
-    //     }
-
-    //     // Check if OTP is expired
-    //     if (resetRecord.expiresAt < new Date()) {
-    //         throw this.response.initResponse(false, 'OTP expired', null);
-    //     }
-
-    //     // Check if OTP is already used
-    //     if (resetRecord.used) {
-    //         throw this.response.initResponse(false, 'OTP already used', null);
-    //     }
-
-    //     // Validate password strength
     //     if (newPassword.length < 8) {
-    //         throw this.response.initResponse(false, 'Password is too weak', null);
+    //         throw new BadRequestException('Password is too weak');
     //     }
 
-    //     // Hash new password
     //     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    //     // Update user password
-    //     await this.authRepository.update({ password: hashedPassword }, { where: { email: resetRecord.email } });
+    //     // Update user password in database (replace with actual database update)
+    //     // await this.authRepository.update({ password: hashedPassword }, { where: { email: resetRecord.email } });
 
-    //     // Mark OTP as used
-    //     await this.authRepository.update({ used: true }, { where: { otp } });
+    //     // Mark OTP as used (replace with database update)
+    //     // await this.authRepository.update({ used: true }, { where: { otp } });
 
     //     // Send success email
     //     await this.emailService.sendPasswordResetSuccessEmail(resetRecord.email);
 
-    //     return this.response.initResponse(true, 'Password reset successfully', null);
+    //     return null;
     // }
 
-    // async changePassword(userId: string, currentPassword: string, newPassword: string) {
-    //     // Find user by ID
-    //     const user = await this.authRepository.findByPk(userId);
-    //     if (!user) {
-    //         throw this.response.initResponse(false, 'User not registered', null);
-    //     }
+    async changePassword(userId: string, currentPassword: string, newPassword: string, transaction: Transaction) {
+        const user = await this.authRepository.findByPk(userId, { transaction });
+        if (!user) {
+            throw new BadRequestException('User not registered');
+        }
 
-    //     if (!user.password) {
-    //         throw this.response.initResponse(false, 'User has no password set', null);
-    //     }
-        
-    //     // Validate current password
-    //     const isValidCurrentPassword = await bcrypt.compare(currentPassword, user.password);
-    //     if (!isValidCurrentPassword) {
-    //         throw this.response.initResponse(false, 'Invalid current password', null);
-    //     }
+        if (!user.password) {
+            throw new BadRequestException('User has no password set');
+        }
 
-    //     // Validate new password strength
-    //     if (newPassword.length < 8) {
-    //         throw this.response.initResponse(false, 'New password is too weak', null);
-    //     }
+        const isValidCurrentPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidCurrentPassword) {
+            throw new BadRequestException('Invalid current password');
+        }
 
-    //     // Hash new password
-    //     const hashedPassword = await bcrypt.hash(newPassword, 10);
+        if (newPassword.length < 8) {
+            throw new BadRequestException('New password is too weak');
+        }
 
-    //     // Update user password
-    //     await this.authRepository.update({ password: hashedPassword }, { where: { id: userId } });
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    //     return this.response.initResponse(true, 'Password changed successfully', null);
-    // }
+        await this.authRepository.update({ password: hashedPassword }, { where: { id: userId }, transaction });
+
+        return null;
+    }
 }
 
 export default AuthService;

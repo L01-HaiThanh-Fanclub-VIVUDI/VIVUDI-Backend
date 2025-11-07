@@ -44,6 +44,10 @@ export class MediaEntity extends Model<MediaEntity> {
     url: string;
 
     @AllowNull(true)
+    @Column(DataType.INTEGER)
+    order: number;
+
+    @AllowNull(true)
     @Column(DataType.STRING)
     thumbnail_url: string;
 
