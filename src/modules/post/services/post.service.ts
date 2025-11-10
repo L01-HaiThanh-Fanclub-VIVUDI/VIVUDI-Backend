@@ -7,7 +7,7 @@ import { MediaType, OwnerMediaType } from '../../../common/contants';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { Transaction } from 'sequelize';
 import { UserService } from '../../user/services/user.service';
-import { PositionService } from '../../position/position.service';
+import { PositionService } from '../../position/services/position.service';
 import { Sequelize } from 'sequelize-typescript';
 import { Inject } from '@nestjs/common';
 import { SEQUELIZE } from 'src/common/contants';
@@ -72,6 +72,7 @@ export class PostService {
 
     return post;
   }
+
 
   private async _processMediaUploads(
     postId: string,

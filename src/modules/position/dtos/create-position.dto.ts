@@ -13,12 +13,13 @@ export class CreatePositionDto {
   @IsOptional()
   description?: string;
 
+  @IsEnum(LocationType)
+  type: LocationType;
+
   @IsNumber()
   longtitude: number;
 
   @IsNumber()
   lattitude: number;
 
-  @IsEnum(LocationType)
-  type: LocationType;
 }

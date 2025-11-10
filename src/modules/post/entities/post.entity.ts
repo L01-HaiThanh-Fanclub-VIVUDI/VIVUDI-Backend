@@ -5,7 +5,6 @@ import { UserEntity } from '../../user/entities/user.entity';
 import { PostVisibility } from '../../../common/contants';
 import { MediaEntity } from './media.entity';
 import { CommentEntity } from '../../comment/entities/comment.entity';
-import { PositionController } from 'src/modules/position/position.controller';
 import { PositionEntity } from 'src/modules/position/entities/position.entity';
 import { Col } from 'sequelize/lib/utils';
 

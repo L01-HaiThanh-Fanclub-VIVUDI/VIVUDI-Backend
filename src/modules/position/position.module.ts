@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PositionService } from './position.service';
+import { PositionService } from './services/position.service';
 import { PositionController } from './position.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { PositionEntity } from './entities/position.entity';

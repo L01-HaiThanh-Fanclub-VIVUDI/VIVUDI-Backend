@@ -28,12 +28,8 @@ export class PositionEntity extends Model<PositionEntity> {
     description: string;
 
     @AllowNull(false)
-    @Column(DataType.FLOAT)
-    longtitude: number;
-
-    @AllowNull(false)
-    @Column(DataType.FLOAT)
-    lattitude: number;
+    @Column(DataType.GEOMETRY('POINT'))
+    point: object;
 
     @AllowNull(false)
     @Column(DataType.ENUM(...Object.values(LocationType) as string[]))
