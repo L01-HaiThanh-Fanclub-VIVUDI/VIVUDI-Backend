@@ -16,7 +16,7 @@ export class PositionService {
 
 	async create(createPositionDto: any, transaction: Transaction): Promise<PositionEntity> {
 		try {
-
+			console.log(createPositionDto)
 			return await this.positionModel.create({ ...createPositionDto }, { transaction })
 		}
 		catch (error) {
@@ -36,41 +36,42 @@ export class PositionService {
 	}
 
 	//    async create(point: any, transaction: Transaction): Promise<PointEntity> {
-    //     try {
+	//     try {
 
-    //         return await this.pointRepository.create({ ...point }, { transaction })
-    //     }
-    //     catch (error) {
-    //         console.error('Failed to create position:', error);
-    //         throw error;
-    //     }
-    //     // return 'This action adds a new position';
-    // }
+	//         return await this.pointRepository.create({ ...point }, { transaction })
+	//     }
+	//     catch (error) {
+	//         console.error('Failed to create position:', error);
+	//         throw error;
+	//     }
+	//     // return 'This action adds a new position';
+	// }
 
-    async findAllNearBy(point: any, radius: number) {
-        const {longtitude, lattitude} = point 
-        const results = await this.positionModel.findAll({
-            attributes: {
-                include: [
-                    [
-                    literal(`
-                        ST_Distance_Sphere(
-                            point(coordinates->"$.coordinates[0]", coordinates->"$.coordinates[1]"),
-                            point(${longtitude}, ${lattitude})
-                        )`),
-                    'distance'
-                    ],
-                ],
-            },
-            where: literal(`
-                ST_Distance_Sphere(
-                point(coordinates->"$.coordinates[0]", coordinates->"$.coordinates[1]"),
-                point(${longtitude}, ${lattitude})
-                ) < ${radius} `),
-            order: literal('distance ASC'),
-        });
-        return results
-    }
+	async findAllNearBy(point: any, radius: number) {
+		const { longtitude, lattitude } = point
+		const results = await this.positionModel.findAll({
+			attributes: {
+				include: [
+				[
+					literal(`
+					ST_Distance_Sphere(
+						point,
+						POINT(${longtitude}, ${lattitude})
+					)
+					`),
+					'distance'
+				]
+			]},
+			where: literal(`
+				ST_Distance_Sphere(
+				point,
+				POINT(${longtitude}, ${lattitude})
+				) < ${radius}
+			`),
+			order: literal('distance ASC'),
+		});
+		return results
+	}
 
 	async remove(id: number, transaction: Transaction) {
 		try {

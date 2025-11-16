@@ -27,7 +27,7 @@ export class PositionController {
                 address: createPositionDto.address || null,
                 description: createPositionDto.description || null,
                 type: createPositionDto.type,
-                coordinate: { type: 'Point', coordinates: [createPositionDto.longtitude, createPositionDto.lattitude] }
+                point: { type: 'Point', coordinates: [createPositionDto.longtitude, createPositionDto.lattitude] }
             }
 
             const result = await this.positionService.create(positionInfo, transaction);
@@ -67,6 +67,7 @@ export class PositionController {
     @Get('getInfo/:longtitude/:lattitude/:radius')
     async getInfoNearBy(@Param('longtitude') longtitude: number, @Param('lattitude') lattitude: number, @Param('radius') radius: number) {
         try {
+            console.log(typeof longtitude)
             const coordinate = {
                 longtitude: longtitude,
                 lattitude: lattitude
@@ -75,6 +76,7 @@ export class PositionController {
             return this.responseService.initResponse(true, "Get info successful", info);
         }
         catch (error) {
+            console.log(error)
             if (error instanceof BadRequestException) {
                 throw new BadRequestException(this.responseService.initResponse(false, error.message, null));
             } 
