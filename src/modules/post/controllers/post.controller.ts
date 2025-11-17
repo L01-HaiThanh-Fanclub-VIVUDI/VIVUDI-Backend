@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseInterceptors, UploadedFiles, Inject, HttpExc
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PostService } from '../services/post.service';
 import { CreatePostDto } from '../dtos/create-post.dto';
-import { CreatePostRequestDto } from '../dtos/create-post-request.dto'; // New import
+import { CreatePostRequestDto } from '../dtos/create-post-request.dto';
 import { Sequelize } from 'sequelize-typescript';
 import { SEQUELIZE } from 'src/common/contants';
 import { Response as ResponseService } from 'src/modules/common/response/response.entity';
@@ -11,6 +11,7 @@ import { validate } from 'class-validator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import type { UUID } from 'crypto';
+import { CustomParseFilePipe } from 'src/common/pipes/custom-parse-file.pipe';
 
 interface AuthenticatedRequest extends Request {
     user: { userId: UUID; email: string; };
@@ -27,7 +28,29 @@ export class PostController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('media'))
-  async createPost(@Body() body: CreatePostRequestDto, @Req() req: AuthenticatedRequest, @UploadedFiles() files: Express.Multer.File[]) { // Modified line
+  async createPost(
+    @Body() body: CreatePostRequestDto,
+    @Req() req: AuthenticatedRequest,
+    @UploadedFiles(
+      new CustomParseFilePipe({
+        maxSize: 20 * 1024 * 1024, // 20MB
+        fileTypes: [
+          // images
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          // videos
+          'video/mp4',
+          'video/quicktime',
+          'video/x-msvideo',
+          'video/x-matroska',
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    files: Express.Multer.File[],
+  ) {
     const transaction = await this.sequelize.transaction();
     try {
       const createPostDto = plainToInstance(CreatePostDto, JSON.parse(body.data));
@@ -37,12 +60,14 @@ export class PostController {
         const errorMessages = errors
           .map(error => (error.constraints ? Object.values(error.constraints) : []))
           .flat();
-        throw new BadRequestException(this.responseService.initResponse(false, 'Validation failed', errorMessages));
+        throw new BadRequestException(
+          this.responseService.initResponse(false, 'Validation failed', errorMessages),
+        );
       }
-      
+
       createPostDto.author_id = req.user.userId;
 
-      const post = await this.postService.createPost(createPostDto, files, transaction); // Modified line
+      const post = await this.postService.createPost(createPostDto, files, transaction);
 
       await transaction.commit();
       return this.responseService.initResponse(true, 'Post created successfully', post);
@@ -50,11 +75,18 @@ export class PostController {
       await transaction.rollback();
       if (error instanceof BadRequestException) {
         const validationErrors = (error.getResponse() as any).message;
-        throw new BadRequestException(this.responseService.initResponse(false, 'Validation failed', validationErrors));
+        throw new BadRequestException(
+          this.responseService.initResponse(false, 'Validation failed', validationErrors),
+        );
       } else if (error instanceof HttpException) {
-        throw new HttpException(this.responseService.initResponse(false, error.message, null), error.getStatus());
+        throw new HttpException(
+          this.responseService.initResponse(false, error.message, null),
+          error.getStatus(),
+        );
       }
-      throw new InternalServerErrorException(this.responseService.initResponse(false, 'Internal Server Error', null));
+      throw new InternalServerErrorException(
+        this.responseService.initResponse(false, 'Internal Server Error', null),
+      );
     }
   }
 

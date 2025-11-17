@@ -11,6 +11,8 @@ import { PositionService } from '../../position/services/position.service';
 import { Sequelize } from 'sequelize-typescript';
 import { Inject } from '@nestjs/common';
 import { SEQUELIZE } from 'src/common/contants';
+import { LoggerService } from '../../common/logger/logger.service';
+import { PositionEntity } from 'src/modules/position/entities/position.entity';
 
 @Injectable()
 export class PostService {
@@ -21,6 +23,7 @@ export class PostService {
     private readonly userService: UserService,
     private readonly positionService: PositionService,
     @Inject(SEQUELIZE) private readonly sequelize: Sequelize,
+    private readonly logger: LoggerService,
   ) { }
 
   async createPost(createPostDto: CreatePostDto, files: Array<Express.Multer.File>, transaction: Transaction) {
@@ -63,7 +66,10 @@ export class PostService {
 
   async getPostById(postId: string) {
     const post = await this.postRepository.findByPk(postId, {
-      include: [{ model: MediaEntity, as: 'medias' }],
+      include: [
+        { model: MediaEntity, as: 'medias' },
+        { model: PositionEntity, as: 'location' },
+      ],
     });
 
     if (!post) {
@@ -72,7 +78,6 @@ export class PostService {
 
     return post;
   }
-
 
   private async _processMediaUploads(
     postId: string,
@@ -113,8 +118,9 @@ export class PostService {
     } catch (error) {
       await transaction.rollback();
       console.error(`Error in _processMediaUploads for post ${postId}:`, error);
+      // Log the error but do not re-throw to allow post creation to succeed even if media upload fails
+      this.logger.error(`Media upload failed for post ${postId}: ${error.message}`, error.stack);
       // TODO: Consider more robust error handling, e.g., notifying admin, queueing for retry.
-      throw error; // Re-throw to ensure the .catch in createPost is still triggered.
     }
   }
 }
