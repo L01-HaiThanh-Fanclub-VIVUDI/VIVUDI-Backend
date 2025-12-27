@@ -7,6 +7,8 @@ export class AppController {
 
   @Get()
   getHello(): string {
+    const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+    console.log(`✅ Server is running at ${timestamp}`);
     return this.appService.getHello();
   }
 }
