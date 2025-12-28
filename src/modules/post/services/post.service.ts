@@ -41,6 +41,7 @@ export class PostService {
         author_id: createPostDto.author_id,
         visibility: createPostDto.visibility,
         location_id: createPostDto.location_id,
+        rating: createPostDto.rating,
       } as any, { transaction });
 
       // Asynchronously process media uploads

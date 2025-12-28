@@ -15,7 +15,7 @@ import type { UUID } from 'crypto';
 import { CustomParseFilePipe } from 'src/common/pipes/custom-parse-file.pipe';
 
 interface AuthenticatedRequest extends Request {
-    user: { userId: UUID; email: string; };
+  user: { userId: UUID; email: string; };
 }
 
 @ApiTags('post')
@@ -26,7 +26,7 @@ export class PostController {
     private readonly postService: PostService,
     @Inject(SEQUELIZE) private readonly sequelize: Sequelize,
     private readonly responseService: ResponseService,
-  ) {}
+  ) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new post' })
@@ -38,7 +38,7 @@ export class PostController {
         data: {
           type: 'string',
           description: 'JSON string containing post data (content, location_id, visibility)',
-          example: '{"content":"My post content","location_id":"123e4567-e89b-12d3-a456-426614174000","visibility":"PUBLIC"}',
+          example: '{"content":"My post content","location_id":"123e4567-e89b-12d3-a456-426614174000","visibility":"public","rating":5}',
         },
         media: {
           type: 'array',
@@ -51,8 +51,8 @@ export class PostController {
       },
     },
   })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Post created successfully',
     schema: {
       example: {
@@ -79,8 +79,8 @@ export class PostController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 400, 
+  @ApiResponse({
+    status: 400,
     description: 'Bad request - validation failed',
     schema: {
       example: {
@@ -90,8 +90,8 @@ export class PostController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Unauthorized',
     schema: {
       example: {
@@ -112,6 +112,7 @@ export class PostController {
         fileTypes: [
           // images
           'image/jpeg',
+          'image/jpg',
           'image/png',
           'image/gif',
           'image/webp',
@@ -135,6 +136,7 @@ export class PostController {
         const errorMessages = errors
           .map(error => (error.constraints ? Object.values(error.constraints) : []))
           .flat();
+        console.log('Validation errors:', errorMessages); // Log detailed errors
         throw new BadRequestException(
           this.responseService.initResponse(false, 'Validation failed', errorMessages),
         );
@@ -148,8 +150,11 @@ export class PostController {
       return this.responseService.initResponse(true, 'Post created successfully', post);
     } catch (error) {
       await transaction.rollback();
+      console.error('Create post error:', error); // Log full error
       if (error instanceof BadRequestException) {
-        const validationErrors = (error.getResponse() as any).message;
+        const response: any = error.getResponse();
+        // If response has data (our validation errors), use it. Otherwise use message or default.
+        const validationErrors = response.data || response.message || response;
         throw new BadRequestException(
           this.responseService.initResponse(false, 'Validation failed', validationErrors),
         );
@@ -168,8 +173,8 @@ export class PostController {
   @Get(':id')
   @ApiOperation({ summary: 'Get post by ID' })
   @ApiParam({ name: 'id', description: 'Post ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Post fetched successfully',
     schema: {
       example: {
@@ -209,8 +214,8 @@ export class PostController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Unauthorized',
     schema: {
       example: {
@@ -220,8 +225,8 @@ export class PostController {
       }
     }
   })
-  @ApiResponse({ 
-    status: 404, 
+  @ApiResponse({
+    status: 404,
     description: 'Post not found',
     schema: {
       example: {

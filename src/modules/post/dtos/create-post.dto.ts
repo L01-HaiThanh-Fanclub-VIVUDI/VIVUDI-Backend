@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { UUID } from 'crypto';
 import { PostVisibility } from '../../../common/contants';
@@ -20,4 +20,11 @@ export class CreatePostDto {
   @ApiProperty({ enum: PostVisibility, example: PostVisibility.PUBLIC, description: 'Post visibility' })
   @IsEnum(PostVisibility)
   visibility: PostVisibility;
+
+  @ApiPropertyOptional({ example: 5, description: 'Rating (1-5)', minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  rating?: number;
 }

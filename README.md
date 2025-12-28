@@ -1,7 +1,7 @@
 env:
 DB_USER=avnadmin
 DB_PASS=AVNS_uhxhowGin7y7ntvLWFh
-DB_NAME=vivudi
+DB_NAME=defaultdb
 DB_HOST=mysql-32e89ccd-thanhan-a576.h.aivencloud.com
 DB_PORT=19364
 DB_DIALECT=mysql
@@ -36,7 +36,6 @@ JWT_SECRET_KEY=e3bc28b242b82506720cb56bbdb1b7c651b1ad4df205a4835848884459340a78
 GOOGLE_DRIVE_CLIENT_ID=1003961944892-m9qrghsbga5kobc6hauoak91oca9ji1s.apps.googleusercontent.com
 GOOGLE_DRIVE_CLIENT_SECRET=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
 GOOGLE_DRIVE_REDIRECT_URI=http://localhost:3000/oauth2callback
-GOOGLE_DRIVE_REFRESH_TOKEN=1//0gFHsYhIkr_osCgYIARAAGBASNwF-L9IrxbTCxqApLt-6IYY2lKr-b_RVjJyweOYIyJKbO1B6wXiZgxwtSlgd44UZBEu-bYQLtuk
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
