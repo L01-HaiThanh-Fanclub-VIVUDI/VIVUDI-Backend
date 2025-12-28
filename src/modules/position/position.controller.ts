@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, InternalServerErrorException, HttpException, Inject, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { Sequelize } from 'sequelize-typescript';
 import { SEQUELIZE } from 'src/common/contants';
 import { PositionService } from './services/position.service';
@@ -8,6 +9,7 @@ import { Point } from './dtos/point.dto';
 import { trace } from 'console';
 // import { UpdatePositionDto } from './dto/update-position.dto';
 
+@ApiTags('position')
 @Controller('position')
 export class PositionController {
     constructor(
@@ -17,6 +19,10 @@ export class PositionController {
     ) { }
 
     @Post('create')
+    @ApiOperation({ summary: 'Create a new position/location' })
+    @ApiBody({ type: CreatePositionDto })
+    @ApiResponse({ status: 201, description: 'Position created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
     @UsePipes(new ValidationPipe({ transform: true }))
     async create(@Body() createPositionDto: CreatePositionDto) {
         const transaction = await this.sequelize.transaction();
@@ -47,6 +53,10 @@ export class PositionController {
     }
 
     @Get('getInfo/:id')
+    @ApiOperation({ summary: 'Get position information by ID' })
+    @ApiParam({ name: 'id', description: 'Position ID' })
+    @ApiResponse({ status: 200, description: 'Position information fetched successfully' })
+    @ApiResponse({ status: 404, description: 'Position not found' })
     async getInfoById(@Param('id') id: string) {
         try {
             const info = await this.positionService.findOneById(id);
@@ -65,6 +75,11 @@ export class PositionController {
 
 
     @Get('getInfo/:longtitude/:lattitude/:radius')
+    @ApiOperation({ summary: 'Get positions near a location' })
+    @ApiParam({ name: 'longtitude', description: 'Longitude coordinate', type: Number })
+    @ApiParam({ name: 'lattitude', description: 'Latitude coordinate', type: Number })
+    @ApiParam({ name: 'radius', description: 'Search radius in meters', type: Number })
+    @ApiResponse({ status: 200, description: 'Nearby positions fetched successfully' })
     async getInfoNearBy(@Param('longtitude') longtitude: number, @Param('lattitude') lattitude: number, @Param('radius') radius: number) {
         try {
             console.log(typeof longtitude)
@@ -89,6 +104,8 @@ export class PositionController {
 
 
     @Get('getAllInfo')
+    @ApiOperation({ summary: 'Get all positions' })
+    @ApiResponse({ status: 200, description: 'All positions fetched successfully' })
     async getAllInfo() {
         try {
             const allInfo = await this.positionService.findAll();
@@ -106,6 +123,10 @@ export class PositionController {
     }
 
     @Delete(':id')
+    @ApiOperation({ summary: 'Delete a position' })
+    @ApiParam({ name: 'id', description: 'Position ID' })
+    @ApiResponse({ status: 200, description: 'Position deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Position not found' })
     async remove(@Param('id') id: string) {
         const transaction = await this.sequelize.transaction();
         try {

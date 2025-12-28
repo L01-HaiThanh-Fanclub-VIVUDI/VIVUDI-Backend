@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Req, Res, Next, UsePipes, ValidationPipe, BadRequestException, HttpException, InternalServerErrorException, UseGuards, Get } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { Inject } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
@@ -17,6 +18,7 @@ interface AuthenticatedRequest extends Request {
     user: { userId: string; email: string; };
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -26,6 +28,10 @@ export class AuthController {
     ) { }
 
     @Post('register')
+    @ApiOperation({ summary: 'Register a new user' })
+    @ApiBody({ type: RegisterDto })
+    @ApiResponse({ status: 201, description: 'User registered successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
     @UsePipes(new ValidationPipe({ transform: true }))
     async register(@Body() registerDto: RegisterDto) {
         const transaction = await this.sequelize.transaction();
@@ -46,6 +52,10 @@ export class AuthController {
     }
 
     @Post('login')
+    @ApiOperation({ summary: 'Login user' })
+    @ApiBody({ type: LoginDto })
+    @ApiResponse({ status: 200, description: 'Login successful' })
+    @ApiResponse({ status: 400, description: 'Bad request - invalid credentials' })
     @UsePipes(new ValidationPipe({ transform: true }))
     async login(@Body() loginDto: LoginDto) {
         const transaction = await this.sequelize.transaction();

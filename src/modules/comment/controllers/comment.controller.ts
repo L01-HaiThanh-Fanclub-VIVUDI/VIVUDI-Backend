@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards, Req, HttpException, BadRequestException, InternalServerErrorException, Inject } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { CommentService } from '../services/comment.service';
 import { CreateCommentDto } from '../dtos/create-comment.dto';
 import { UpdateCommentDto } from '../dtos/update-comment.dto';
@@ -15,6 +16,8 @@ interface AuthenticatedRequest extends Request {
   user: { userId: UUID; email: string; };
 }
 
+@ApiTags('comment')
+@ApiBearerAuth('JWT-auth')
 @Controller('comment')
 export class CommentController {
   constructor(
@@ -24,6 +27,11 @@ export class CommentController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new comment' })
+  @ApiBody({ type: CreateCommentDto })
+  @ApiResponse({ status: 201, description: 'Comment created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   async createComment(
     @Body() createCommentDto: CreateCommentDto,
@@ -67,6 +75,10 @@ export class CommentController {
   }
 
   @Get('post/:postId')
+  @ApiOperation({ summary: 'Get all comments for a post' })
+  @ApiParam({ name: 'postId', description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Comments fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   async getCommentsByPostId(@Param('postId') postId: string) {
     try {
@@ -81,6 +93,11 @@ export class CommentController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get comment by ID' })
+  @ApiParam({ name: 'id', description: 'Comment ID' })
+  @ApiResponse({ status: 200, description: 'Comment fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
   @UseGuards(JwtAuthGuard)
   async getCommentById(@Param('id') id: string) {
     try {
@@ -95,6 +112,13 @@ export class CommentController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update a comment' })
+  @ApiParam({ name: 'id', description: 'Comment ID' })
+  @ApiBody({ type: UpdateCommentDto })
+  @ApiResponse({ status: 200, description: 'Comment updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not the comment owner' })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
   @UseGuards(JwtAuthGuard)
   async updateComment(
     @Param('id') id: string,
@@ -113,6 +137,12 @@ export class CommentController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a comment' })
+  @ApiParam({ name: 'id', description: 'Comment ID' })
+  @ApiResponse({ status: 200, description: 'Comment deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not the comment owner' })
+  @ApiResponse({ status: 404, description: 'Comment not found' })
   @UseGuards(JwtAuthGuard)
   async deleteComment(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     try {

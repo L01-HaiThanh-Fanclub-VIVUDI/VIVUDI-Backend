@@ -1,5 +1,6 @@
 import { Controller, Post, Body, UseInterceptors, UploadedFiles, Inject, HttpException, BadRequestException, InternalServerErrorException, UseGuards, Req, Get, Param } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBearerAuth, ApiBody, ApiParam } from '@nestjs/swagger';
 import { PostService } from '../services/post.service';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { CreatePostRequestDto } from '../dtos/create-post-request.dto';
@@ -17,6 +18,8 @@ interface AuthenticatedRequest extends Request {
     user: { userId: UUID; email: string; };
 }
 
+@ApiTags('post')
+@ApiBearerAuth('JWT-auth')
 @Controller('post')
 export class PostController {
   constructor(
@@ -26,6 +29,31 @@ export class PostController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new post' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'string',
+          description: 'JSON string containing post data (content, location_id, visibility)',
+          example: '{"content":"My post content","location_id":"123e4567-e89b-12d3-a456-426614174000","visibility":"PUBLIC"}',
+        },
+        media: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+          description: 'Media files (images/videos) - max 20MB each',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Post created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('media'))
   async createPost(
@@ -91,6 +119,11 @@ export class PostController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get post by ID' })
+  @ApiParam({ name: 'id', description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Post fetched successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Post not found' })
   @UseGuards(JwtAuthGuard)
   async getPost(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     try {
