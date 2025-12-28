@@ -9,7 +9,13 @@ export class AppController {
 
   @Get()
   @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ status: 200, description: 'Server is running' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Server is running',
+    schema: {
+      example: 'Hello World!'
+    }
+  })
   getHello(): string {
     const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
     console.log(`✅ Server is running at ${timestamp}`);

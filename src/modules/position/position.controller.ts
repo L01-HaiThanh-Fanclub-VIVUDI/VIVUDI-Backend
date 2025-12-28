@@ -21,8 +21,40 @@ export class PositionController {
     @Post('create')
     @ApiOperation({ summary: 'Create a new position/location' })
     @ApiBody({ type: CreatePositionDto })
-    @ApiResponse({ status: 201, description: 'Position created successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+    @ApiResponse({ 
+        status: 201, 
+        description: 'Position created successfully',
+        schema: {
+            example: {
+                success: true,
+                message: 'Position created successfully',
+                data: {
+                    id: '123e4567-e89b-12d3-a456-426614174000',
+                    name: 'Ho Chi Minh City',
+                    address: '123 Main Street, District 1',
+                    description: 'A beautiful city in Vietnam',
+                    type: 'CITY',
+                    point: {
+                        type: 'Point',
+                        coordinates: [106.6297, 10.8231]
+                    },
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-01T00:00:00.000Z'
+                }
+            }
+        }
+    })
+    @ApiResponse({ 
+        status: 400, 
+        description: 'Bad request - validation failed',
+        schema: {
+            example: {
+                success: false,
+                message: 'Validation failed',
+                data: null
+            }
+        }
+    })
     @UsePipes(new ValidationPipe({ transform: true }))
     async create(@Body() createPositionDto: CreatePositionDto) {
         const transaction = await this.sequelize.transaction();
@@ -55,8 +87,40 @@ export class PositionController {
     @Get('getInfo/:id')
     @ApiOperation({ summary: 'Get position information by ID' })
     @ApiParam({ name: 'id', description: 'Position ID' })
-    @ApiResponse({ status: 200, description: 'Position information fetched successfully' })
-    @ApiResponse({ status: 404, description: 'Position not found' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Position information fetched successfully',
+        schema: {
+            example: {
+                success: true,
+                message: 'Get info successful',
+                data: {
+                    id: '123e4567-e89b-12d3-a456-426614174000',
+                    name: 'Ho Chi Minh City',
+                    address: '123 Main Street, District 1',
+                    description: 'A beautiful city in Vietnam',
+                    type: 'CITY',
+                    point: {
+                        type: 'Point',
+                        coordinates: [106.6297, 10.8231]
+                    },
+                    createdAt: '2024-01-01T00:00:00.000Z',
+                    updatedAt: '2024-01-01T00:00:00.000Z'
+                }
+            }
+        }
+    })
+    @ApiResponse({ 
+        status: 404, 
+        description: 'Position not found',
+        schema: {
+            example: {
+                success: false,
+                message: 'Position not found',
+                data: null
+            }
+        }
+    })
     async getInfoById(@Param('id') id: string) {
         try {
             const info = await this.positionService.findOneById(id);
@@ -79,7 +143,42 @@ export class PositionController {
     @ApiParam({ name: 'longtitude', description: 'Longitude coordinate', type: Number })
     @ApiParam({ name: 'lattitude', description: 'Latitude coordinate', type: Number })
     @ApiParam({ name: 'radius', description: 'Search radius in meters', type: Number })
-    @ApiResponse({ status: 200, description: 'Nearby positions fetched successfully' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Nearby positions fetched successfully',
+        schema: {
+            example: {
+                success: true,
+                message: 'Get info successful',
+                data: [
+                    {
+                        id: '123e4567-e89b-12d3-a456-426614174000',
+                        name: 'Ho Chi Minh City',
+                        address: '123 Main Street, District 1',
+                        description: 'A beautiful city in Vietnam',
+                        type: 'CITY',
+                        point: {
+                            type: 'Point',
+                            coordinates: [106.6297, 10.8231]
+                        },
+                        distance: 500.5
+                    },
+                    {
+                        id: '123e4567-e89b-12d3-a456-426614174001',
+                        name: 'Ben Thanh Market',
+                        address: 'Le Loi Street, District 1',
+                        description: 'Famous market in HCMC',
+                        type: 'MARKET',
+                        point: {
+                            type: 'Point',
+                            coordinates: [106.6296, 10.8230]
+                        },
+                        distance: 1200.3
+                    }
+                ]
+            }
+        }
+    })
     async getInfoNearBy(@Param('longtitude') longtitude: number, @Param('lattitude') lattitude: number, @Param('radius') radius: number) {
         try {
             console.log(typeof longtitude)
@@ -105,7 +204,44 @@ export class PositionController {
 
     @Get('getAllInfo')
     @ApiOperation({ summary: 'Get all positions' })
-    @ApiResponse({ status: 200, description: 'All positions fetched successfully' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'All positions fetched successfully',
+        schema: {
+            example: {
+                success: true,
+                message: 'Get all info successful',
+                data: [
+                    {
+                        id: '123e4567-e89b-12d3-a456-426614174000',
+                        name: 'Ho Chi Minh City',
+                        address: '123 Main Street, District 1',
+                        description: 'A beautiful city in Vietnam',
+                        type: 'CITY',
+                        point: {
+                            type: 'Point',
+                            coordinates: [106.6297, 10.8231]
+                        },
+                        createdAt: '2024-01-01T00:00:00.000Z',
+                        updatedAt: '2024-01-01T00:00:00.000Z'
+                    },
+                    {
+                        id: '123e4567-e89b-12d3-a456-426614174001',
+                        name: 'Ben Thanh Market',
+                        address: 'Le Loi Street, District 1',
+                        description: 'Famous market in HCMC',
+                        type: 'MARKET',
+                        point: {
+                            type: 'Point',
+                            coordinates: [106.6296, 10.8230]
+                        },
+                        createdAt: '2024-01-01T00:00:00.000Z',
+                        updatedAt: '2024-01-01T00:00:00.000Z'
+                    }
+                ]
+            }
+        }
+    })
     async getAllInfo() {
         try {
             const allInfo = await this.positionService.findAll();
@@ -125,8 +261,31 @@ export class PositionController {
     @Delete(':id')
     @ApiOperation({ summary: 'Delete a position' })
     @ApiParam({ name: 'id', description: 'Position ID' })
-    @ApiResponse({ status: 200, description: 'Position deleted successfully' })
-    @ApiResponse({ status: 404, description: 'Position not found' })
+    @ApiResponse({ 
+        status: 200, 
+        description: 'Position deleted successfully',
+        schema: {
+            example: {
+                success: true,
+                message: 'Position deleted successfully',
+                data: {
+                    id: '123e4567-e89b-12d3-a456-426614174000',
+                    deleted: true
+                }
+            }
+        }
+    })
+    @ApiResponse({ 
+        status: 404, 
+        description: 'Position not found',
+        schema: {
+            example: {
+                success: false,
+                message: 'Position not found',
+                data: null
+            }
+        }
+    })
     async remove(@Param('id') id: string) {
         const transaction = await this.sequelize.transaction();
         try {

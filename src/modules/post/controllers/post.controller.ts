@@ -51,9 +51,56 @@ export class PostController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Post created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Post created successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Post created successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          content: 'My post content',
+          author_id: '123e4567-e89b-12d3-a456-426614174001',
+          visibility: 'PUBLIC',
+          location_id: '123e4567-e89b-12d3-a456-426614174002',
+          rating: null,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          medias: [
+            {
+              id: '123e4567-e89b-12d3-a456-426614174003',
+              url: 'https://drive.google.com/file/d/example123/view',
+              type: 'IMAGE',
+              order: 1
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - validation failed',
+    schema: {
+      example: {
+        success: false,
+        message: 'Validation failed',
+        data: ['content should not be empty', 'location_id must be a UUID']
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('media'))
   async createPost(
@@ -121,9 +168,69 @@ export class PostController {
   @Get(':id')
   @ApiOperation({ summary: 'Get post by ID' })
   @ApiParam({ name: 'id', description: 'Post ID' })
-  @ApiResponse({ status: 200, description: 'Post fetched successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Post not found' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Post fetched successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Post fetched successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          content: 'My post content',
+          author_id: '123e4567-e89b-12d3-a456-426614174001',
+          author: {
+            id: '123e4567-e89b-12d3-a456-426614174001',
+            display_name: 'John Doe',
+            avt_url: 'https://example.com/avatar.jpg'
+          },
+          visibility: 'PUBLIC',
+          location_id: '123e4567-e89b-12d3-a456-426614174002',
+          location: {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            name: 'Ho Chi Minh City',
+            address: '123 Main Street',
+            type: 'CITY'
+          },
+          rating: 4.5,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          medias: [
+            {
+              id: '123e4567-e89b-12d3-a456-426614174003',
+              url: 'https://drive.google.com/file/d/example123/view',
+              type: 'IMAGE',
+              order: 1,
+              thumbnail_url: 'https://drive.google.com/file/d/example123/thumbnail'
+            }
+          ],
+          comments: []
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Post not found',
+    schema: {
+      example: {
+        success: false,
+        message: 'Post not found',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async getPost(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     try {

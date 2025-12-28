@@ -29,9 +29,52 @@ export class CommentController {
   @Post()
   @ApiOperation({ summary: 'Create a new comment' })
   @ApiBody({ type: CreateCommentDto })
-  @ApiResponse({ status: 201, description: 'Comment created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Comment created successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Comment created successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          content: 'Great post!',
+          post_id: '123e4567-e89b-12d3-a456-426614174001',
+          user_id: '123e4567-e89b-12d3-a456-426614174002',
+          parent_id: null,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          user: {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            display_name: 'John Doe',
+            avt_url: 'https://example.com/avatar.jpg'
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Bad request - validation failed',
+    schema: {
+      example: {
+        success: false,
+        message: 'Validation failed',
+        data: ['content should not be empty', 'post_id must be a UUID']
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async createComment(
     @Body() createCommentDto: CreateCommentDto,
@@ -77,8 +120,59 @@ export class CommentController {
   @Get('post/:postId')
   @ApiOperation({ summary: 'Get all comments for a post' })
   @ApiParam({ name: 'postId', description: 'Post ID' })
-  @ApiResponse({ status: 200, description: 'Comments fetched successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Comments fetched successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Comments fetched successfully',
+        data: [
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            content: 'Great post!',
+            post_id: '123e4567-e89b-12d3-a456-426614174001',
+            user_id: '123e4567-e89b-12d3-a456-426614174002',
+            parent_id: null,
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+            user: {
+              id: '123e4567-e89b-12d3-a456-426614174002',
+              display_name: 'John Doe',
+              avt_url: 'https://example.com/avatar.jpg'
+            },
+            child_comments: []
+          },
+          {
+            id: '123e4567-e89b-12d3-a456-426614174003',
+            content: 'I agree!',
+            post_id: '123e4567-e89b-12d3-a456-426614174001',
+            user_id: '123e4567-e89b-12d3-a456-426614174004',
+            parent_id: '123e4567-e89b-12d3-a456-426614174000',
+            createdAt: '2024-01-01T01:00:00.000Z',
+            updatedAt: '2024-01-01T01:00:00.000Z',
+            user: {
+              id: '123e4567-e89b-12d3-a456-426614174004',
+              display_name: 'Jane Smith',
+              avt_url: 'https://example.com/avatar2.jpg'
+            },
+            child_comments: []
+          }
+        ]
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async getCommentsByPostId(@Param('postId') postId: string) {
     try {
@@ -95,9 +189,57 @@ export class CommentController {
   @Get(':id')
   @ApiOperation({ summary: 'Get comment by ID' })
   @ApiParam({ name: 'id', description: 'Comment ID' })
-  @ApiResponse({ status: 200, description: 'Comment fetched successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Comment not found' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Comment fetched successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Comment fetched successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          content: 'Great post!',
+          post_id: '123e4567-e89b-12d3-a456-426614174001',
+          user_id: '123e4567-e89b-12d3-a456-426614174002',
+          parent_id: null,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+          user: {
+            id: '123e4567-e89b-12d3-a456-426614174002',
+            display_name: 'John Doe',
+            avt_url: 'https://example.com/avatar.jpg'
+          },
+          post: {
+            id: '123e4567-e89b-12d3-a456-426614174001',
+            content: 'My post content'
+          },
+          child_comments: []
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Comment not found',
+    schema: {
+      example: {
+        success: false,
+        message: 'Comment not found',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async getCommentById(@Param('id') id: string) {
     try {
@@ -115,10 +257,58 @@ export class CommentController {
   @ApiOperation({ summary: 'Update a comment' })
   @ApiParam({ name: 'id', description: 'Comment ID' })
   @ApiBody({ type: UpdateCommentDto })
-  @ApiResponse({ status: 200, description: 'Comment updated successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not the comment owner' })
-  @ApiResponse({ status: 404, description: 'Comment not found' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Comment updated successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Comment updated successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          content: 'Updated comment content',
+          post_id: '123e4567-e89b-12d3-a456-426614174001',
+          user_id: '123e4567-e89b-12d3-a456-426614174002',
+          parent_id: null,
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T02:00:00.000Z'
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - not the comment owner',
+    schema: {
+      example: {
+        success: false,
+        message: 'You are not authorized to update this comment',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Comment not found',
+    schema: {
+      example: {
+        success: false,
+        message: 'Comment not found',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async updateComment(
     @Param('id') id: string,
@@ -139,10 +329,53 @@ export class CommentController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a comment' })
   @ApiParam({ name: 'id', description: 'Comment ID' })
-  @ApiResponse({ status: 200, description: 'Comment deleted successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not the comment owner' })
-  @ApiResponse({ status: 404, description: 'Comment not found' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Comment deleted successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Comment deleted successfully',
+        data: {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          deleted: true
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized',
+    schema: {
+      example: {
+        success: false,
+        message: 'Unauthorized',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - not the comment owner',
+    schema: {
+      example: {
+        success: false,
+        message: 'You are not authorized to delete this comment',
+        data: null
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Comment not found',
+    schema: {
+      example: {
+        success: false,
+        message: 'Comment not found',
+        data: null
+      }
+    }
+  })
   @UseGuards(JwtAuthGuard)
   async deleteComment(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     try {
