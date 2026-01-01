@@ -169,6 +169,111 @@ export class PostController {
 			);
 		}
 	}
+	
+	@Get('/getByPositionId')
+	@ApiOperation({ summary: 'Get post by positionId' })
+	@ApiQuery({ name: 'positionId', description: 'Position ID' })
+	@ApiQuery({ name: 'page', description: 'Page number' })
+	@ApiQuery({ name: 'limit', description: 'Number of items per page' })
+	@ApiResponse({
+		status: 200,
+		description: 'Post fetched successfully',
+		schema: {
+			example: {
+				success: true,
+				message: 'Post fetched successfully',
+				data: {
+					data: [
+						{
+							"id": "f75e0166-cca4-403f-8578-08b197bc97bd",
+							"content": "gyvyyv",
+							"author_id": "36e3a933-6be7-4f7c-bce4-221de3f2206b",
+							"visibility": "public",
+							"location_id": "48ebb300-4070-43f6-952a-7f740cf35505",
+							"rating": null,
+							"createdAt": "2025-12-29T03:44:38.000Z",
+							"updatedAt": "2025-12-29T03:44:38.000Z",
+							"medias": [
+								{
+									"id": "643472a8-33c9-42c9-a387-cfe426a74de8",
+									"post_id": "f75e0166-cca4-403f-8578-08b197bc97bd",
+									"location_id": "48ebb300-4070-43f6-952a-7f740cf35505",
+									"owner_type": "post",
+									"type": "image",
+									"url": "1SHNwQgEaZs8SsVrTc2-sUV5kUvYU5eCs",
+									"order": 0,
+									"thumbnail_url": null,
+									"folder_path": "1GpWyJfOcioC9MfvqA0jbFEFkRcJ35C0s",
+									"createdAt": "2025-12-29T03:44:42.000Z",
+									"updatedAt": "2025-12-29T03:44:42.000Z"
+								}
+							],
+							"location": {
+								"id": "48ebb300-4070-43f6-952a-7f740cf35505",
+								"name": "KTX KHU A",
+								"address": "Dĩ An, Bình Dương, Việt Nam",
+								"description": "Created by user on 29/12/2025",
+								"point": {
+									"type": "Point",
+									"coordinates": [
+										106.8064133,
+										10.8773
+									]
+								},
+								"type": "coffee",
+								"createdAt": "2025-12-29T03:44:21.000Z",
+								"updatedAt": "2025-12-29T03:44:21.000Z"
+							}
+						}
+					],
+					pagination: {
+						"page": 1,
+						"limit": 10,
+						"total": 39,
+						"totalPage": 4
+					}
+				}
+			}
+		}
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized',
+		schema: {
+			example: {
+				success: false,
+				message: 'Unauthorized',
+				data: null
+			}
+		}
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Post not found',
+		schema: {
+			example: {
+				success: false,
+				message: 'Post not found',
+				data: null
+			}
+		}
+	})
+	// @UseGuards(JwtAuthGuard)
+	async getPostByPositionId(
+		@Query('positionId') positionId: string,
+		@Query('page') page: string, 
+		@Query('limit') limit: string) {
+		
+			try {
+				const post = await this.postService.getPostByPositionId(positionId, parseInt(page), parseInt(limit));
+				return this.responseService.initResponse(true, 'Post fetched successfully', post);
+			} catch (error) {
+				if (error instanceof HttpException) {
+					throw new HttpException(this.responseService.initResponse(false, error.message, null), error.getStatus());
+				}
+				throw new InternalServerErrorException(this.responseService.initResponse(false, 'Internal Server Error', null));
+			}
+	}
 
 	@Get()
 	@ApiOperation({ summary: 'Get all post by ID' })
@@ -349,4 +454,9 @@ export class PostController {
 			throw new InternalServerErrorException(this.responseService.initResponse(false, 'Internal Server Error', null));
 		}
 	}
+
+
+
 }
+
+

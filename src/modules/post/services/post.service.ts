@@ -80,6 +80,32 @@ export class PostService {
 		return post;
 	}
 
+	async getPostByPositionId(positionId: string, page: number, limit: number) {
+		const offset = (page - 1) * limit;
+
+		const { rows, count } = await this.postRepository.findAndCountAll({
+			offset,
+			limit,
+			where: { location_id: positionId },
+			include: [
+				{ model: MediaEntity, as: 'medias' },
+				{ model: PositionEntity, as: 'location' },
+			],
+
+			order: [['createdAt', 'DESC']],
+		});
+
+		return {
+				data: rows.map(r => r.get({ plain: true })),
+				pagination: {
+					page,
+					limit,
+					total: count,
+					totalPage: Math.ceil(count / limit),
+				},
+			};
+	}
+
 	private async _processMediaUploads(
 		postId: string,
 		locationId: string,
