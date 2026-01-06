@@ -1,42 +1,3 @@
-env:
-DB_USER=avnadmin
-DB_PASS=AVNS_uhxhowGin7y7ntvLWFh
-DB_NAME=defaultdb
-DB_HOST=mysql-32e89ccd-thanhan-a576.h.aivencloud.com
-DB_PORT=19364
-DB_DIALECT=mysql
-
-CA_CERTIFICATE="-----BEGIN CERTIFICATE-----\MIIEUDCCArigAwIBAgIUBzpNxVVhb5QnBK/ZcK7Q4diPT7UwDQYJKoZIhvcNAQEM
-BQAwQDE+MDwGA1UEAww1ZDYxNDNlYTUtOGFmNS00ZjU1LWIxNjktNjQ5NGNhNmY1
-MmU4IEdFTiAxIFByb2plY3QgQ0EwHhcNMjUxMDAxMDkwOTE1WhcNMzUwOTI5MDkw
-OTE1WjBAMT4wPAYDVQQDDDVkNjE0M2VhNS04YWY1LTRmNTUtYjE2OS02NDk0Y2E2
-ZjUyZTggR0VOIDEgUHJvamVjdCBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCC
-AYoCggGBAJUicVxmqYryojJ+CrBcO6tGjivxwdwRR4T9xpTQA80hfUjMvboTsecj
-nMA8EI2Mvojlk02jR1DAymsWTJXeCC2cux3Ug4qF72bCJwKPlYPjwot5V7RHwD2X
-jZZ5Rmoh9sc+B8qWESQmBrdJOUKgft02vwyEwSCtm0AjOFfkFZKiLvGC52Bh9nM1
-PKtolexb2fbjeixPYTzji/jUEvWPwsS69WW+RrmZFCYRS7fzfJIzA8/uZwtqcJ5z
-oyJVDYby9imGsaDS1bBVXkn8EMm43xbtB7xKOTUCuTWM20ZkrKFgjTqKinmSneOU
-yEsJqEconRwRxM97LWm/WlYQNLHa9uwwhZhIjWk4/ibZSb8UUYLEDdwzqMdV0kMF
-XT/wRxjZ/57x5NPOhlKWrgF24ZfPn34ZdcW3BMJg88SIFny6f7NHkTENruEOZW3y
-e3GaNyDVIBYhfJfrJaZnoiTkqSyT/B7C6l8wHG1+tXctpj8JI25vhl9812HA9ma+
-dKXxfJ1ArQIDAQABo0IwQDAdBgNVHQ4EFgQU0Wp7FkqVi4GvW2yxT+AWpvviKhgw
-EgYDVR0TAQH/BAgwBgEB/wIBADALBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQEMBQAD
-ggGBAGqAoGAlOiLgJ8M1YzKYbb54CdsEOMd3ui4WM0VUccuOIoBeAJrUjFw8fnwS
-CeitxeD6krQCDsYefGSjeTO7D+CfiLHYseChuzOWp6My9IB8tYU1nAMXseEKnQJN
-/60QDvJA+h4rSlYaiTVWs7sZLXPu4lMdyAOX2547Ansku0V26of0WKhzPe5la1EY
-TxE12p0r/HqDQ305cERZZh2o1sv+zPO/7gKECkPTcYksm/crFlBKodJFX6/IJLbU
-6Sq/MDAMikrboNtE23MtpN0a2F3r2C7l+4csKZ+o5UKH8bzGFFt8B+9snj2RgNkP
-2QRmX/3FLAZNpsmUThzQ3U0kWvB9aUGO6EbRzl9HPZEBvWn9XolmNwwkfx3JLNbk
-1H1pxcpAi4h9QxeZayUHTS9X80Y5L+Xba9cNWPIaH3ngcSGe0AXu+jXbCCWs/Umj
-emXSDQuxaaKZrrnkaj7HbKyjM2szZvMeHDqbeP9sMzf59WW7baa4X6JPwYRRBQf1
-7rrevA==\n-----END CERTIFICATE-----\n"
-
-JWT_SECRET_KEY=e3bc28b242b82506720cb56bbdb1b7c651b1ad4df205a4835848884459340a78
-
-GOOGLE_DRIVE_CLIENT_ID=1003961944892-m9qrghsbga5kobc6hauoak91oca9ji1s.apps.googleusercontent.com
-GOOGLE_DRIVE_CLIENT_SECRET=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
-GOOGLE_DRIVE_REDIRECT_URI=http://localhost:3000/oauth2callback
-
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -135,3 +96,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
