@@ -1,12 +1,13 @@
-import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+// TODO: Uncomment when implementing reset password feature
+// import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class ResetPasswordDto {
-    @IsString()
-    @IsNotEmpty()
-    otp: string;
+// export class ResetPasswordDto {
+//     @IsString()
+//     @IsNotEmpty()
+//     otp: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @MinLength(8, { message: 'Password must be at least 8 characters long' })
-    password: string;
-}
+//     @IsString()
+//     @IsNotEmpty()
+//     @MinLength(8, { message: 'Password must be at least 8 characters long' })
+//     password: string;
+// }

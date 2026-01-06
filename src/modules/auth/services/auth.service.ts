@@ -20,7 +20,7 @@ export class AuthService {
         private readonly response: Response,
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
-    ) {}
+    ) { }
 
     async register(registerDto: RegisterDto, transaction: Transaction) {
         const { email, phone_number: raw_phone_number, password } = registerDto;
@@ -93,7 +93,7 @@ export class AuthService {
         // Generate JWT token with user_id (from UserEntity), email, and role
         const userProfile = await this.userService.getUserByAuthId(user.id as any, transaction); // Explicitly cast user.id to UUID
         if (!userProfile) {
-          throw new BadRequestException('User profile not found.');
+            throw new BadRequestException('User profile not found.');
         }
         const payload = { userId: userProfile.id, email: user.email /*, role: userProfile.role */ }; // Use userProfile.id here
         const token = this.jwtService.sign(payload);
@@ -127,11 +127,11 @@ export class AuthService {
     //     return this.response.initResponse(true, 'Password reset OTP sent to email', null);
     // }
 
+    private simulatedOTPStore: Record<string, { email: string; expiresAt: Date; used: boolean }> = {};
+
     async verifyOTP(otp: string, transaction: Transaction) {
         // Find OTP in database (replace with actual database lookup)
-        // For now, simulate lookup and assume valid for a short period.
-        const simulatedOTPStore = {}; // This should be replaced with a real database table/entity
-        const resetRecord = simulatedOTPStore[otp]; // This would be a database query
+        const resetRecord = this.simulatedOTPStore[otp];
 
         if (!resetRecord) {
             throw new BadRequestException('Invalid OTP');
@@ -145,7 +145,7 @@ export class AuthService {
             throw new BadRequestException('OTP already used');
         }
 
-        // Mark OTP as used (replace with database update)
+        // Mark OTP as used
         resetRecord.used = true;
 
         return { email: resetRecord.email };

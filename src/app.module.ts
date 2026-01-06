@@ -13,9 +13,11 @@ import { GoogleDriveModule } from './modules/common/google-drive/google-drive.mo
 import { LoggerModule } from './modules/common/logger/logger.module';
 import { APP_FILTER } from '@nestjs/core';
 import { UnauthorizedExceptionFilter } from './common/filters/unauthorized.filter';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 
 @Module({
     imports: [
+        SentryModule.forRoot(),
         DatabaseModule,
         AuthModule,
         PostModule,
@@ -29,6 +31,10 @@ import { UnauthorizedExceptionFilter } from './common/filters/unauthorized.filte
     controllers: [AppController],
     providers: [
         AppService,
+        {
+            provide: APP_FILTER,
+            useClass: SentryGlobalFilter,
+        },
         {
             provide: APP_FILTER,
             useClass: UnauthorizedExceptionFilter,

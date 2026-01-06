@@ -5,10 +5,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nes
 import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos/register.dto';
 import { LoginDto } from '../dtos/login.dto';
-import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
-import { VerifyOtpDto } from '../dtos/verify-otp.dto';
-import { ResetPasswordDto } from '../dtos/reset-password.dto';
-import { ChangePasswordDto } from '../dtos/change-password.dto';
+// import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
+// import { VerifyOtpDto } from '../dtos/verify-otp.dto';
+// import { ResetPasswordDto } from '../dtos/reset-password.dto';
+// import { ChangePasswordDto } from '../dtos/change-password.dto';
 import { Response as ResponseService } from 'src/modules/common/response/response.entity';
 import { Sequelize } from 'sequelize-typescript';
 import { SEQUELIZE } from 'src/common/contants';
@@ -30,8 +30,8 @@ export class AuthController {
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
     @ApiBody({ type: RegisterDto })
-    @ApiResponse({ 
-        status: 201, 
+    @ApiResponse({
+        status: 201,
         description: 'User registered successfully',
         schema: {
             type: 'object',
@@ -71,8 +71,8 @@ export class AuthController {
             }
         }
     })
-    @ApiResponse({ 
-        status: 400, 
+    @ApiResponse({
+        status: 400,
         description: 'Bad request - validation failed',
         schema: {
             type: 'object',
@@ -110,8 +110,8 @@ export class AuthController {
     @Post('login')
     @ApiOperation({ summary: 'Login user' })
     @ApiBody({ type: LoginDto })
-    @ApiResponse({ 
-        status: 200, 
+    @ApiResponse({
+        status: 200,
         description: 'Login successful',
         schema: {
             type: 'object',
@@ -151,8 +151,8 @@ export class AuthController {
             }
         }
     })
-    @ApiResponse({ 
-        status: 400, 
+    @ApiResponse({
+        status: 400,
         description: 'Bad request - invalid credentials',
         schema: {
             type: 'object',

@@ -96,17 +96,17 @@ export class PostService {
 		});
 
 		return {
-				data: rows.map(r => r.get({ plain: true })),
-				pagination: {
-					page,
-					limit,
-					total: count,
-					totalPage: Math.ceil(count / limit),
-				},
-			};
+			data: rows.map(r => r.get({ plain: true })),
+			pagination: {
+				page,
+				limit,
+				total: count,
+				totalPage: Math.ceil(count / limit),
+			},
+		};
 	}
 
-	private async _processMediaUploads(
+	public async _processMediaUploads(
 		postId: string,
 		locationId: string,
 		files: Array<Express.Multer.File>,
@@ -128,7 +128,7 @@ export class PostService {
 				} else if (file.mimetype.startsWith('video')) {
 					mediaType = MediaType.VIDEO;
 				} else {
-					throw new InternalServerErrorException('Unsupported media type.');
+					throw new Error(`Unsupported media type: ${file.mimetype}`);
 				}
 
 				await this.mediaRepository.create({
@@ -145,9 +145,7 @@ export class PostService {
 		} catch (error) {
 			await transaction.rollback();
 			console.error(`Error in _processMediaUploads for post ${postId}:`, error);
-			// Log the error but do not re-throw to allow post creation to succeed even if media upload fails
 			this.logger.error(`Media upload failed for post ${postId}: ${error.message}`, error.stack);
-			// TODO: Consider more robust error handling, e.g., notifying admin, queueing for retry.
 		}
 	}
 
