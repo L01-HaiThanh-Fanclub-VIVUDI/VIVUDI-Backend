@@ -1,39 +1,39 @@
 name: Deploy Backend
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
 
 jobs:
-deploy:
-runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  - name: Connect to Tailscale
-    uses: tailscale/github-action@v2
-    with:
-      authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-  - name: Deploy to Ubuntu Server
-    uses: appleboy/ssh-action@v1.0.3
-    with:
-      host: ${{ secrets.VPS_TAILSCALE_IP }}
-      username: root
-      key: ${{ secrets.VPS_SSH_KEY }}
+      - name: Deploy to Ubuntu Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_TAILSCALE_IP }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
 
-      script: |
-        cd /var/www/vivudi/VIVUDI-Backend
+          script: |
+            cd /var/www/vivudi/VIVUDI-Backend
 
-        git pull origin main
+            git pull origin main
 
-        npm ci
+            npm ci
 
-        npm run build
+            npm run build
 
-        pm2 reload vivudi-api
+            pm2 reload vivudi-api
 
-        pm2 save
+            pm2 save
