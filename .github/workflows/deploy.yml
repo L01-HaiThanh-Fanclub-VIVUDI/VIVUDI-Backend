@@ -34,6 +34,6 @@ jobs:
 
             npm run build
 
-            pm2 reload vivudi-api
+            pm2 reload VIVUDI-Backend
 
             pm2 save
