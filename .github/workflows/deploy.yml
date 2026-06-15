@@ -1,36 +1,41 @@
-name: CI/CD for VIVUDI Backend
+```yaml id="r7q2wx"
+name: Deploy Backend
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
         with:
-          node-version: '20'
-          cache: 'npm'
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Deploy to Ubuntu Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_TAILSCALE_IP }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
 
-      # - name: Lint check
-      #   run: npm run lint
+          script: |
+            cd /var/www/vivudi/VIVUDI-Backend
 
-      - name: Build project
-        run: npm run build
+            git pull origin main
 
-      # Chỉ thực hiện bước này nếu push vào nhánh main và không phải là Pull Request
-      - name: Trigger Render Deployment
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+            npm ci
+
+            npm run build
+
+            pm2 reload vivudi-api
+
+            pm2 save
+```
